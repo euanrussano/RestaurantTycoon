@@ -25,11 +25,15 @@ import ktx.graphics.use
 import ktx.math.vec2
 import ktx.math.vec3
 import ktx.scene2d.*
+import kotlin.math.roundToInt
 
 class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter {
     private var placingFurniture: Furniture? = null
 
     private val moneyLabel: Label
+    private val dayLabel: Label
+    private val timeLabel: Label
+
     private val customersInQueueLabel: Label
     private val customersWaitingToOrderLabel: Label
     private val customersWaitingToEatLabel: Label
@@ -62,6 +66,13 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
 
                     label("$ ")
                     moneyLabel = label("0")
+                    add().growX()
+                    label("Day ")
+                    dayLabel = label("${restaurant.day}")
+                    label(", ")
+                    timeLabel = label("${restaurant.time.roundToInt()}")
+                    label(":00")
+
                 }
                 row()
                 table {
@@ -195,6 +206,9 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
 
     private fun updateUI() {
         moneyLabel.txt = "${restaurant.balance}"
+        dayLabel.txt = "${restaurant.day}"
+        timeLabel.txt = "${restaurant.time.roundToInt()}"
+
         customersInQueueLabel.txt = "${restaurant.customersInQueueAndIncoming.size}"
         customersWaitingToOrderLabel.txt = "${restaurant.customersWaitingToOrder.size}"
         customersWaitingToEatLabel.txt = "${restaurant.customersWaitingToEat.size}"

@@ -1,5 +1,8 @@
 package com.sophia.restauranttycoon.model.role
 
-abstract class EmployeeRestaurantRole: RestaurantRole {
+abstract class EmployeeRestaurantRole(
+    var salary: Int
+): RestaurantRole {
+
 
 }

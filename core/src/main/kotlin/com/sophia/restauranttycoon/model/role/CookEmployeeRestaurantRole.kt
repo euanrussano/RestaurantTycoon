@@ -5,7 +5,7 @@ import com.sophia.restauranttycoon.model.Restaurant
 import com.sophia.restauranttycoon.model.RestaurantCharacter
 import com.sophia.restauranttycoon.model.state.cook.IdleCookState
 
-class CookEmployeeRestaurantRole : EmployeeRestaurantRole() {
+class CookEmployeeRestaurantRole : EmployeeRestaurantRole(100) {
 
     override val startingState: State<RestaurantCharacter> = IdleCookState()
     override fun update(delta: Float, restaurantCharacter: RestaurantCharacter, restaurant: Restaurant) {

@@ -5,7 +5,9 @@ import com.sophia.restauranttycoon.model.Restaurant
 import com.sophia.restauranttycoon.model.RestaurantCharacter
 import com.sophia.restauranttycoon.model.state.waiter.IdleWaiterState
 
-class WaiterEmployeeRestaurantRole : EmployeeRestaurantRole() {
+class WaiterEmployeeRestaurantRole(
+
+) : EmployeeRestaurantRole(100) {
 
     override val startingState: State<RestaurantCharacter> = IdleWaiterState()
 

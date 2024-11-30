@@ -1,6 +1,7 @@
 package com.sophia.restauranttycoon.model
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.ai.GdxAI
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Pool
 import com.sophia.restauranttycoon.model.furniture.Counter
@@ -22,7 +23,8 @@ class Restaurant(
     val owned: Array<Array<Boolean>>,
 
 ) {
-
+    var day = 0
+    var time = 0f
 
     val entitiesToRelease = mutableListOf<RestaurantCharacter>()
     val customerPool = object : Pool<RestaurantCharacter>(){
@@ -109,6 +111,69 @@ class Restaurant(
             restaurantCharacters -= restaurantCharacter
         }
         entitiesToRelease.clear()
+
+        // advance time
+        val delta = GdxAI.getTimepiece().deltaTime
+        time += delta
+        if (time > 24f){
+            day += 1
+            time = 0f
+            performDailyTasks()
+        }
+    }
+
+    private fun performDailyTasks() {
+        // salary payment
+        paySalaries()
+
+        // Maintenance costs - FUTURE
+//        performMaintenance()
+
+        // Check for special events or promotions starting tomorrow - FUTURE
+//        scheduleEventsForTomorrow()
+
+        // Reset daily specials or menu items - FUTURE
+//        resetDailySpecials()
+
+        // Log end of day
+        Gdx.app.log("Restaurant", "End of day $day tasks performed.")
+    }
+
+    private fun paySalaries() {
+        val totalSalaries = employees.sumOf { (it.role as EmployeeRestaurantRole).salary }
+        if (balance >= totalSalaries) {
+            balance -= totalSalaries
+            Gdx.app.log("Restaurant", "Paid total salaries: $totalSalaries")
+        } else {
+            Gdx.app.log("Restaurant", "Not enough balance to pay salaries!")
+            // Handle the scenario where there is not enough money to pay salaries
+            // FUTURE:
+            // affect morale/productivity?
+            // strikes/quitting?
+            // loan?
+        }
+    }
+
+    private fun performMaintenance() {
+        // FUTURE
+//        val maintenanceCost = furnitures.sumOf { it.maintenanceCost }
+//        balance -= maintenanceCost
+//        Gdx.app.log("Restaurant", "Maintenance cost $maintenanceCost deducted")
+    }
+
+    private fun resetDailySpecials() {
+        // FUTURE
+//        meals.forEach { it.resetSpecial() }
+    }
+
+    private fun scheduleEventsForTomorrow() {
+        // FUTURE
+        // Example of setting a special event
+//        if (Random.nextFloat() < 0.1) {  // 10% chance of a special event
+//            val event = Event("Live Music", increaseInCustomers = 20)
+//            upcomingEvents.add(event)
+//            Gdx.app.log("Restaurant", "Special event planned: ${event.name}")
+//        }
     }
 
 
