@@ -28,8 +28,13 @@ enum class WaiterState: State<RestaurantCharacter> {
 
 
             // first check if there is a customer waiting to order
-            // find a seat with customer waiting to order
-            val customer = restaurant.customersWaitingToOrder.firstOrNull()
+            // find a seat with customer waiting to order with no other waiter assigned
+            val customer = restaurant.customersWaitingToOrder.firstOrNull {
+                for (w in restaurant.waiters) {
+                    if ((w.role as WaiterEmployeeRestaurantRole).assignedSeat?.customer == it) return@firstOrNull  false
+                }
+                return@firstOrNull true
+            }
             // move to seat
             if (customer != null){
                 val seat = restaurant.getAssignedSeatForCustomer(customer)

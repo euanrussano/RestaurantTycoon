@@ -20,6 +20,7 @@ class Restaurant(
     val owned: Array<Array<Boolean>>,
 
 ) {
+
     var day = 0
     var time = 0f
 
@@ -74,7 +75,8 @@ class Restaurant(
 
     val customers get() = restaurantCharacters.filter { it.role is CustomerRestaurantRole }
     val employees get() = restaurantCharacters.filter { it.role is EmployeeRestaurantRole }
-
+    val waiters get() = restaurantCharacters.filter { it.role is WaiterEmployeeRestaurantRole }
+    val cooks get() = restaurantCharacters.filter { it.role is CookEmployeeRestaurantRole }
     val customersInQueueAndIncoming get() = customers.filter {
         it.stateMachine.currentState == CustomerState.WAITING_IN_QUEUE ||
             it.stateMachine.currentState == CustomerState.JUST_SPAWNED
