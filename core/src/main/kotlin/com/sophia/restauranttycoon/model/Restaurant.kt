@@ -4,19 +4,16 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ai.GdxAI
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Pool
+import com.badlogic.gdx.utils.Pools
 import com.sophia.restauranttycoon.model.furniture.Counter
 import com.sophia.restauranttycoon.model.furniture.Furniture
 import com.sophia.restauranttycoon.model.furniture.Seat
 import com.sophia.restauranttycoon.model.furniture.Stove
 import com.sophia.restauranttycoon.model.role.*
-import com.sophia.restauranttycoon.model.state.customer.CustomerEatingState
-import com.sophia.restauranttycoon.model.state.customer.JustSpawnedState
-import com.sophia.restauranttycoon.model.state.customer.PlacingOrderState
-import com.sophia.restauranttycoon.model.state.customer.WaitingInQueueState
+import com.sophia.restauranttycoon.model.state.CustomerState
 import com.sophia.restauranttycoon.model.system.CustomerSpawnSystem
 import com.sophia.restauranttycoon.model.system.MovementSystem
 import com.sophia.restauranttycoon.model.system.RestaurantSystem
-import kotlin.reflect.KClass
 
 class Restaurant(
     val tilemap: Array<Array<Tile>>,
@@ -27,16 +24,17 @@ class Restaurant(
     var time = 0f
 
     val entitiesToRelease = mutableListOf<RestaurantCharacter>()
-    val customerPool = object : Pool<RestaurantCharacter>(){
-        override fun newObject(): RestaurantCharacter {
-            val customer = RestaurantCharacter(CustomerRestaurantRole(), 0, 0, this@Restaurant)
-            return customer
-        }
-
-    }
+    // Pooling is not working properly - FUTURE TODO
+//    val customerPool = object : Pool<RestaurantCharacter>(){
+//        override fun newObject(): RestaurantCharacter {
+//            val customer = RestaurantCharacter(CustomerRestaurantRole(), 0, 0, this@Restaurant)
+//            return customer
+//        }
+//
+//    }
 
     // money
-    var balance: Int = 0
+    var balance: Int = 1000
 
     // the menu
     val meals = mutableListOf<Meal>(
@@ -47,7 +45,7 @@ class Restaurant(
 
     )
 
-
+    //val queue = mutableListOf<RestaurantCharacter>()
     val endOfQueue: Pair<Int, Int>
         get() {
 
@@ -61,7 +59,7 @@ class Restaurant(
                 }
             }
             val queue = customers.filter {
-                it.stateMachine.currentState is WaitingInQueueState
+                it.stateMachine.currentState == CustomerState.WAITING_IN_QUEUE
             }
             return door.first - queue.size to door.second-1
         }
@@ -78,19 +76,17 @@ class Restaurant(
     val employees get() = restaurantCharacters.filter { it.role is EmployeeRestaurantRole }
 
     val customersInQueueAndIncoming get() = customers.filter {
-        it.stateMachine.currentState is WaitingInQueueState ||
-            it.stateMachine.currentState is JustSpawnedState
+        it.stateMachine.currentState == CustomerState.WAITING_IN_QUEUE ||
+            it.stateMachine.currentState == CustomerState.JUST_SPAWNED
     }
     val customersWaitingToOrder get() = customers.filter {
-        val state = it.stateMachine.currentState as? PlacingOrderState ?: return@filter false
-        return@filter state.orderPlaced == false
+        it.stateMachine.currentState == CustomerState.PLACE_ORDER && !(it.role as CustomerRestaurantRole).orderPlaced
     }
     val customersWaitingToEat get() = customers.filter {
-        val state = it.stateMachine.currentState as? PlacingOrderState ?: return@filter false
-        return@filter state.orderPlaced == true
+        it.stateMachine.currentState == CustomerState.PLACE_ORDER && (it.role as CustomerRestaurantRole).orderPlaced
     }
     val customersEating get() = customers.filter {
-        it.stateMachine.currentState is CustomerEatingState
+        it.stateMachine.currentState == CustomerState.EAT
     }
 
 
@@ -107,7 +103,7 @@ class Restaurant(
         }
 
         for (restaurantCharacter in entitiesToRelease) {
-            customerPool.free(restaurantCharacter)
+//            customerPool.free(restaurantCharacter)
             restaurantCharacters -= restaurantCharacter
         }
         entitiesToRelease.clear()
@@ -209,8 +205,10 @@ class Restaurant(
 
     fun addCustomer() {
         // spawn a customer in the bottom left corner
-        val customer = customerPool.obtain()
-        restaurantCharacters += customer
+//        val customer = customerPool.obtain()
+        val customer = CustomerRestaurantRole()
+        val character = RestaurantCharacter(customer, 0, 0, this)
+        restaurantCharacters.add(character)
         Gdx.app.log("Restaurant", "spawn a customer")
 
     }
@@ -226,13 +224,14 @@ class Restaurant(
         } as? Seat ?: throw Exception("seat not found")
     }
 
-    fun findFirstCustomerWaitingToOrder(): RestaurantCharacter? {
-        val customer = customers.firstOrNull {
-            val state = it.stateMachine.currentState as? PlacingOrderState ?: return@firstOrNull false
-            return@firstOrNull state.orderPlaced == false
-        }
-        return customer
-    }
+    // TO DELETE
+//    fun findFirstCustomerWaitingToOrder(): RestaurantCharacter? {
+//        val customer = customers.firstOrNull {
+//            val state = it.stateMachine.currentState as? PlacingOrderState ?: return@firstOrNull false
+//            return@firstOrNull state.orderPlaced == false
+//        }
+//        return customer
+//    }
 
     fun findNearestCounter(sourcePosition: Vector2): Counter {
         val countersSorted =furnitures.filterIsInstance<Counter>().sortedBy {

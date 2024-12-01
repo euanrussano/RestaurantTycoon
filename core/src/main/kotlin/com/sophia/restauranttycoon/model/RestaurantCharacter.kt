@@ -20,8 +20,7 @@ class RestaurantCharacter(
 
 
     var targetPosition: Vector2 = Vector2(-1f, -1f)
-    val startingState = role.startingState
-    val stateMachine = DefaultStateMachine<RestaurantCharacter, State<RestaurantCharacter>>(this, startingState)
+    val stateMachine = DefaultStateMachine<RestaurantCharacter, State<RestaurantCharacter>>(this, role.startingState)
     val position = Vector2(x.toFloat(), y.toFloat())
 
     init {
@@ -45,7 +44,8 @@ class RestaurantCharacter(
     }
 
     override fun reset() {
-        stateMachine.changeState(startingState)
+        role.reset()
+        stateMachine.changeState(role.startingState)
         position.set(0f, 0f)
         targetPosition.set(-1f, -1f)
     }
