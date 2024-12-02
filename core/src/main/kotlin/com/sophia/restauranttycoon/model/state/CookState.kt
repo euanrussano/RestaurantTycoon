@@ -117,8 +117,8 @@ enum class CookState: State<RestaurantCharacter> {
 //        TODO("Not yet implemented")
     }
 
-    override fun onMessage(entity: RestaurantCharacter?, p1: Telegram?): Boolean {
-        TODO("Not yet implemented")
+    override fun onMessage(entity: RestaurantCharacter, telegram: Telegram): Boolean {
+        return false
     }
 }
 

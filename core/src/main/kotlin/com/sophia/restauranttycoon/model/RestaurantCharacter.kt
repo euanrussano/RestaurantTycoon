@@ -38,6 +38,7 @@ class RestaurantCharacter(
 
     init {
         MessageManager.getInstance().addListener(this, Messages.MEAL_ARRIVED)
+        MessageManager.getInstance().addListener(this, Messages.CUSTOMER_LEFT_QUEUE)
     }
 
     fun update(delta: Float, restaurant: Restaurant) {
@@ -74,3 +75,4 @@ class RestaurantCharacter(
 
 
 }
+

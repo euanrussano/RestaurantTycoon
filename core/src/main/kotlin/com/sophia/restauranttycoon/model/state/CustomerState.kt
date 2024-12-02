@@ -3,6 +3,7 @@ package com.sophia.restauranttycoon.model.state
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ai.GdxAI
 import com.badlogic.gdx.ai.fsm.State
+import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.ai.msg.Telegram
 import com.badlogic.gdx.math.MathUtils
 import com.sophia.restauranttycoon.Messages
@@ -58,6 +59,8 @@ enum class CustomerState: State<RestaurantCharacter> {
                 freeSeat.customer = entity
                 entity.targetPosition.set(freeSeat.position)
                 entity.stateMachine.changeState(MOVING_TO_SEAT)
+                // let others know that the customer left the queue
+                MessageManager.getInstance().dispatchMessage(entity, Messages.CUSTOMER_LEFT_QUEUE)
                 return
             }
 
@@ -66,6 +69,15 @@ enum class CustomerState: State<RestaurantCharacter> {
 
         override fun toString(): String {
             return "Customer: In Queue"
+        }
+
+        override fun onMessage(entity: RestaurantCharacter, telegram: Telegram): Boolean {
+            if (telegram.sender == entity) return false
+            if (telegram.message == Messages.CUSTOMER_LEFT_QUEUE){
+                entity.stateMachine.changeState(JUST_SPAWNED)
+                return true
+            }
+            return false
         }
     },
     MOVING_TO_SEAT(){

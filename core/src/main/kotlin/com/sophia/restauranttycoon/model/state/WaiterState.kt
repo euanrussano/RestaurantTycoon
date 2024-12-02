@@ -35,6 +35,7 @@ enum class WaiterState: State<RestaurantCharacter> {
                 }
                 return@firstOrNull true
             }
+
             // move to seat
             if (customer != null){
                 val seat = restaurant.getAssignedSeatForCustomer(customer)
@@ -165,6 +166,8 @@ enum class WaiterState: State<RestaurantCharacter> {
             // place order on table and let customer know
             val table = restaurant.findNearest<RestaurantTable>(order.customer.position)
             table.mealOrdersServed.add(order)
+            // clear assigned seat since customer is served
+            role.assignedSeat = null
             MessageManager.getInstance().dispatchMessage(entity, order.customer, Messages.MEAL_ARRIVED)
 
             entity.stateMachine.changeState(IDLE)
@@ -182,7 +185,6 @@ enum class WaiterState: State<RestaurantCharacter> {
     }
 
     override fun onMessage(entity: RestaurantCharacter, telegram: Telegram): Boolean {
-//        TODO("Not yet implemented")
         return false
     }
 }

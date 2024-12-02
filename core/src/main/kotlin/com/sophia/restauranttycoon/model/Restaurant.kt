@@ -20,20 +20,34 @@ class Restaurant(
 
 ) {
     class Report{
-        var lifetimeCustomers: Float = 0f
+        var lifetimeCustomers: Int = 0
         val waitingTimeInQueue = mutableListOf<Float>()
         var waitingTimeToEat = mutableListOf<Float>()
         var eatingTime = mutableListOf<Float>()
         var satisfaction = mutableListOf<Float>()
+        var employees: Int = 0
+        var salariesPerDay = 0
+        var dailyEarnings = mutableListOf<Int>()
 
         val averageWaitingTimeInQueue get() = average(waitingTimeInQueue)
         val averageWaitingTimeToEat get() = average(waitingTimeToEat)
         val averageEatingTime get() = average(eatingTime)
         val averageSatisfaction get() = average(satisfaction)
+        val averageDailyEarnings get() = average(dailyEarnings.map { it.toFloat() })
+        val stats: Map<String, Float> get() = mapOf(
+            "Lifetime customers" to lifetimeCustomers.toFloat(),
+            "Average Waiting Time In Queue" to averageWaitingTimeInQueue,
+            "Average Waiting Time To Eat" to averageWaitingTimeToEat,
+            "Average Eating Time" to averageEatingTime,
+            "Average Satisfaction" to averageSatisfaction,
+            "Average Daily Earnings" to averageDailyEarnings,
+            "Employees" to employees.toFloat(),
+            "salariesPerDay" to salariesPerDay.toFloat()
+        )
 
 
         private fun average(list: List<Float>): Float = list.sum() / list.size
-        fun updateFromCustomer(entity: RestaurantCharacter) {
+        fun recordCustomerService(entity: RestaurantCharacter) {
             val role = entity.role as? CustomerRestaurantRole?: return
             lifetimeCustomers += 1
             waitingTimeInQueue += role.waitingTimeInQueue
@@ -51,7 +65,6 @@ class Restaurant(
     var time = 0f
 
     var reputation = 50
-    var averageDailySatisfaction = 50
     val satisfactionStandard = 50
 
     val entitiesToRelease = mutableListOf<RestaurantCharacter>()
@@ -95,7 +108,7 @@ class Restaurant(
             return door.first - queue.size to door.second-1
         }
     val restaurantSystems: List<RestaurantSystem> = listOf(
-        CustomerSpawnSystem(1),
+        CustomerSpawnSystem(5),
         MovementSystem()
     )
 
@@ -166,10 +179,13 @@ class Restaurant(
         // reputation update and effects
         updateReputationAndEffects()
 
-        // LAST: update reports
+        // update systems
         for (system in restaurantSystems) {
             system.onDayChanged(this)
         }
+
+        // LAST: update the report
+        report.dailyEarnings.add(balance - (report.dailyEarnings.lastOrNull() ?: 0))
 
         // Log end of day
         Gdx.app.log("Restaurant", "End of day $day tasks performed.")
@@ -207,6 +223,7 @@ class Restaurant(
 
     private fun paySalaries() {
         val totalSalaries = employees.sumOf { (it.role as EmployeeRestaurantRole).salary }
+        report.salariesPerDay = totalSalaries
         if (balance >= totalSalaries) {
             balance -= totalSalaries
             Gdx.app.log("Restaurant", "Paid total salaries: $totalSalaries")
@@ -271,6 +288,7 @@ class Restaurant(
 
         val character = RestaurantCharacter(employeeRestaurantRole, x, y, this)
         restaurantCharacters += character
+        report.employees += 1
     }
 
     fun addCustomer() {
@@ -321,6 +339,7 @@ class Restaurant(
     fun processPaymentForMeal(entity: RestaurantCharacter, meal: Meal) {
         val price = meal.price
         this.balance += price
+        report.dailyEarnings += price
     }
 
     fun releaseCustomer(entity: RestaurantCharacter) {
@@ -330,7 +349,7 @@ class Restaurant(
         entitiesToRelease += entity
 
         // collect stats when releasing customer
-        report.updateFromCustomer(entity)
+        report.recordCustomerService(entity)
 
     }
 

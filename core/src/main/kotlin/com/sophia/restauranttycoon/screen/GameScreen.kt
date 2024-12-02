@@ -194,15 +194,40 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
             label("Reputation: ${restaurant.reputation}")
             row()
             table {
-                label("Lifetime customers: ${restaurantReport.lifetimeCustomers.toInt()}")
-                row()
-                label("Avg. Satisfaction: %.2f".format(restaurantReport.averageSatisfaction))
-                row()
-                label("Avg. Waiting time in queue: %.2f".format(restaurantReport.averageWaitingTimeInQueue))
-                row()
-                label("Avg. Waiting time to eat: %.2f".format(restaurantReport.averageWaitingTimeToEat))
-                row()
-                label("Avg. Eating time: %.2f".format(restaurantReport.averageEatingTime))
+                this.defaults().left().pad(2f)
+                for ((statsName, stats) in restaurantReport.stats) {
+                    label("$statsName: ")
+                    label(String.format("%.2f", stats))
+                    row()
+                }
+            }
+            row()
+            table {
+                background = skin.newDrawable("white")
+                it.width(200f).height(100f)
+                for (x in 0 until 100 step 10){
+                    Label(x.toString(), skin).apply {
+                        color = Color.BLACK
+                        this.setBounds(x.toFloat()*2f, -1f, 1f, 1f)
+                        this@table.addActor(this)
+                    }
+                }
+                for (y in 0 until 100 step 10){
+                    Label(y.toString(), skin).apply {
+                        color = Color.BLACK
+                        this.setBounds(-1f, y.toFloat(), 1f, 1f)
+                        this@table.addActor(this)
+                    }
+                }
+                for ((x, y) in restaurantReport.satisfaction.withIndex()) {
+                    Label(".", skin).apply {
+                        scaleBy(2f)
+                        color = Color.RED
+                        this.setBounds(x*2f, y, 1f, 1f)
+                        this@table.addActor(this)
+                    }
+                }
+
             }
             row()
             textButton("OK"){
@@ -243,9 +268,9 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
     override fun render(delta: Float) {
         super.render(delta)
 
-        GdxAI.getTimepiece().update(delta)
+        GdxAI.getTimepiece().update(delta*10)
 
-        restaurant.update(delta)
+        restaurant.update(delta*10)
 
         camera.update()
         batch.use(camera){
