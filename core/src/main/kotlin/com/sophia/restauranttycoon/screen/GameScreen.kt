@@ -306,6 +306,10 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
             row()
             label("State: ${character.stateMachine.currentState}")
             row()
+            character.hungerStateMachine?.let {
+                label("Hunger: ${it.currentState}")
+            }
+            row()
             textButton("OK"){
                 onChange {
                     this@window.remove()

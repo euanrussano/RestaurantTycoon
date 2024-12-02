@@ -1,6 +1,7 @@
 package com.sophia.restauranttycoon.model.role
 
 import com.badlogic.gdx.ai.fsm.State
+import com.badlogic.gdx.ai.fsm.StateMachine
 import com.sophia.restauranttycoon.model.MealOrder
 import com.sophia.restauranttycoon.model.Restaurant
 import com.sophia.restauranttycoon.model.RestaurantCharacter
@@ -12,6 +13,7 @@ class WaiterEmployeeRestaurantRole(
 
 ) : EmployeeRestaurantRole(100) {
 
+    override val hasHunger: Boolean = false
     var assignedSeat: Seat? = null
     var targetCounter: Counter? = null
     var order: MealOrder? = null
