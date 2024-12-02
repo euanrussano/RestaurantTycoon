@@ -36,4 +36,8 @@ class MovementSystem: RestaurantSystem {
 
 
     }
+
+    override fun onReputationChanged(reputation: Int) {
+
+    }
 }
