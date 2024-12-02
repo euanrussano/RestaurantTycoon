@@ -7,6 +7,7 @@ import com.badlogic.gdx.ai.GdxAI
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.sophia.restauranttycoon.Assets
@@ -71,6 +72,12 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
 
                     label("Reputation: ")
                     reputationLabel = label("${restaurant.reputation}")
+
+                    textButton("Report"){
+                        onChange {
+                            openFinancialReportWindow()
+                        }
+                    }
                     add().growX()
                     label("Day ")
                     dayLabel = label("${restaurant.day}")
@@ -108,6 +115,8 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
                             button{
                                 pad(5f)
                                 image(Assets.getFurnitureRegion(RestaurantTable::class))
+                                row()
+                                label(RestaurantTable::class.simpleName.toString())
                                 onChange {
                                     placingFurniture = RestaurantTable(0,0)
                                 }
@@ -115,13 +124,18 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
                             button{
                                 pad(5f)
                                 image(Assets.getFurnitureRegion(Seat::class))
+                                row()
+                                label(Seat::class.simpleName.toString())
                                 onChange {
                                     placingFurniture = Seat(0,0)
                                 }
                             }
+                            row()
                             button{
                                 pad(5f)
                                 image(Assets.getFurnitureRegion(Stove::class))
+                                row()
+                                label(Stove::class.simpleName.toString())
                                 onChange {
                                     placingFurniture = Stove(0,0)
                                 }
@@ -150,6 +164,7 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
                                 }
                             }
                         }
+
                     }
 
                 }
@@ -165,6 +180,40 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
 
             }
         }
+    }
+
+    private fun openFinancialReportWindow() {
+        val restaurantReport = restaurant.report
+        val financialReportWindow = scene2d.window("Financial report") {
+            padTop(10f)
+            this.defaults().pad(5f)
+            label("Day ${restaurant.day}")
+            row()
+            label("Money: ${restaurant.balance}")
+            row()
+            label("Reputation: ${restaurant.reputation}")
+            row()
+            table {
+                label("Lifetime customers: ${restaurantReport.lifetimeCustomers.toInt()}")
+                row()
+                label("Avg. Satisfaction: %.2f".format(restaurantReport.averageSatisfaction))
+                row()
+                label("Avg. Waiting time in queue: %.2f".format(restaurantReport.averageWaitingTimeInQueue))
+                row()
+                label("Avg. Waiting time to eat: %.2f".format(restaurantReport.averageWaitingTimeToEat))
+                row()
+                label("Avg. Eating time: %.2f".format(restaurantReport.averageEatingTime))
+            }
+            row()
+            textButton("OK"){
+                onChange {
+                    this@window.remove()
+                }
+            }
+            pack()
+        }
+        stage.addActor(financialReportWindow)
+        financialReportWindow.centerPosition(stage.width, stage.height)
     }
 
     override fun show() {
@@ -187,7 +236,7 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
         val r = width.toFloat() / height.toFloat()
         camera.setToOrtho(false, r*viewportSize, viewportSize)
         val (height2, width2) = restaurant.tilemap.size to restaurant.tilemap[0].size
-        camera.position.set(width2/2f, height2/2f, 0f)
+        camera.position.set(width2*1f, height2/2f, 0f)
         stage.viewport.update(width, height, true)
     }
 
@@ -196,7 +245,7 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
 
         GdxAI.getTimepiece().update(delta)
 
-        restaurant.update(delta*3)
+        restaurant.update(delta)
 
         camera.update()
         batch.use(camera){

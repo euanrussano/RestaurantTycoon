@@ -2,9 +2,8 @@ package com.sophia.restauranttycoon.model
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ai.GdxAI
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.utils.Pool
-import com.badlogic.gdx.utils.Pools
 import com.sophia.restauranttycoon.model.furniture.Counter
 import com.sophia.restauranttycoon.model.furniture.Furniture
 import com.sophia.restauranttycoon.model.furniture.Seat
@@ -20,6 +19,33 @@ class Restaurant(
     val owned: Array<Array<Boolean>>,
 
 ) {
+    class Report{
+        var lifetimeCustomers: Float = 0f
+        val waitingTimeInQueue = mutableListOf<Float>()
+        var waitingTimeToEat = mutableListOf<Float>()
+        var eatingTime = mutableListOf<Float>()
+        var satisfaction = mutableListOf<Float>()
+
+        val averageWaitingTimeInQueue get() = average(waitingTimeInQueue)
+        val averageWaitingTimeToEat get() = average(waitingTimeToEat)
+        val averageEatingTime get() = average(eatingTime)
+        val averageSatisfaction get() = average(satisfaction)
+
+
+        private fun average(list: List<Float>): Float = list.sum() / list.size
+        fun updateFromCustomer(entity: RestaurantCharacter) {
+            val role = entity.role as? CustomerRestaurantRole?: return
+            lifetimeCustomers += 1
+            waitingTimeInQueue += role.waitingTimeInQueue
+            waitingTimeToEat += role.waitingTimeToEat
+            eatingTime += role.eatingTime
+            satisfaction += entity.satisfaction.toFloat()
+        }
+
+
+    }
+    val report = Report()
+
 
     var day = 0
     var time = 0f
@@ -139,6 +165,11 @@ class Restaurant(
 
         // reputation update and effects
         updateReputationAndEffects()
+
+        // LAST: update reports
+        for (system in restaurantSystems) {
+            system.onDayChanged(this)
+        }
 
         // Log end of day
         Gdx.app.log("Restaurant", "End of day $day tasks performed.")
@@ -297,6 +328,10 @@ class Restaurant(
         val seat = getAssignedSeatForCustomer(entity)
         seat.customer = null
         entitiesToRelease += entity
+
+        // collect stats when releasing customer
+        report.updateFromCustomer(entity)
+
     }
 
 

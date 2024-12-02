@@ -7,7 +7,7 @@ import kotlin.math.sign
 
 class MovementSystem: RestaurantSystem {
 
-    var speed = 1f
+    var speed = 3f
     override fun update(delta: Float, restaurant: Restaurant) {
         for (restaurantCharacter in restaurant.restaurantCharacters) {
             val position = restaurantCharacter.position
@@ -38,6 +38,10 @@ class MovementSystem: RestaurantSystem {
     }
 
     override fun onReputationChanged(reputation: Int) {
+
+    }
+
+    override fun onDayChanged(restaurant: Restaurant) {
 
     }
 }

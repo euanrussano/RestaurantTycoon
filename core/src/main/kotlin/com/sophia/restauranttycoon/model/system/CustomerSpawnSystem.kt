@@ -28,4 +28,8 @@ class CustomerSpawnSystem(
         spawnRate = baseSpawnRate * (1 + (reputation - reputationThreshold)/10)
     }
 
+    override fun onDayChanged(restaurant: Restaurant) {
+        //TODO("Not yet implemented")
+    }
+
 }

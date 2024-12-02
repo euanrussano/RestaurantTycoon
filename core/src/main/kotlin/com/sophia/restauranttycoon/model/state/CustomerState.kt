@@ -21,6 +21,9 @@ enum class CustomerState: State<RestaurantCharacter> {
         }
 
         override fun update(entity: RestaurantCharacter) {
+            val role = entity.role as CustomerRestaurantRole
+            role.waitingTimeInQueue += GdxAI.getTimepiece().deltaTime
+
             val (x, y) = entity.restaurant.endOfQueue
             if (entity.position.x == x.toFloat() && entity.position.y == y.toFloat()) {
                 entity.stateMachine.changeState(WAITING_IN_QUEUE)
@@ -43,6 +46,9 @@ enum class CustomerState: State<RestaurantCharacter> {
         }
 
         override fun update(entity: RestaurantCharacter) {
+            val role = entity.role as CustomerRestaurantRole
+            role.waitingTimeInQueue += GdxAI.getTimepiece().deltaTime
+
             val restaurant = entity.restaurant
             // check if is first of the queue
             if (restaurant.customersInQueueAndIncoming.firstOrNull() == entity){
@@ -68,6 +74,9 @@ enum class CustomerState: State<RestaurantCharacter> {
         }
 
         override fun update(entity: RestaurantCharacter) {
+            val role = entity.role as CustomerRestaurantRole
+            role.waitingTimeToEat += GdxAI.getTimepiece().deltaTime
+
             val restaurant = entity.restaurant
             if (entity.hasTargetPosition()) return
 
@@ -96,6 +105,8 @@ enum class CustomerState: State<RestaurantCharacter> {
         }
 
         override fun update(entity: RestaurantCharacter) {
+            val role = entity.role as CustomerRestaurantRole
+            role.waitingTimeToEat += GdxAI.getTimepiece().deltaTime
         }
 
         override fun onMessage(entity: RestaurantCharacter, telegram: Telegram): Boolean {

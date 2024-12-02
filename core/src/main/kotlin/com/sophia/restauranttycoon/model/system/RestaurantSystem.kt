@@ -6,4 +6,5 @@ interface RestaurantSystem {
 
     fun update(delta: Float, restaurant: Restaurant)
     fun onReputationChanged(reputation: Int)
+    fun onDayChanged(restaurant: Restaurant)
 }

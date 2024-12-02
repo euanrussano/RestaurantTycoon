@@ -16,6 +16,13 @@ class CustomerRestaurantRole : RestaurantRole, Poolable {
     var eatingTime: Float = 0f
     var orderToPlace: MealOrder? = null
     var orderPlaced = false
+
+    // stats
+    var waitingTimeInQueue = 0f
+    var waitingTimeToEat = 0f
+    
+
+
     override val startingState: State<RestaurantCharacter> = CustomerState.JUST_SPAWNED
 
     override fun update(delta: Float, restaurantCharacter: RestaurantCharacter, restaurant: Restaurant) {
