@@ -38,7 +38,7 @@ enum class HungerState(private val penalty: Int): State<RestaurantCharacter> {
         entity.hungerPenaltyClock += GdxAI.getTimepiece().deltaTime
         if (entity.hungerPenaltyClock >= 1f) {
             entity.hungerPenaltyClock -= 1f
-            entity.hungerPenalty -=(hungerStateMachine.currentState as HungerState).penalty
+            entity.hungerPenalty +=(hungerStateMachine.currentState as HungerState).penalty
         }
         if (entity.hungerClock > entity.hungerClockDuration) {
             entity.hungerClock = 0f
