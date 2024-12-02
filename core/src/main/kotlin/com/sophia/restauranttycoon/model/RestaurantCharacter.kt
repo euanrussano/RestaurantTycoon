@@ -1,6 +1,7 @@
 package com.sophia.restauranttycoon.model
 
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine
+import com.badlogic.gdx.ai.fsm.StackStateMachine
 import com.badlogic.gdx.ai.fsm.State
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.ai.msg.Telegram
@@ -10,6 +11,7 @@ import com.badlogic.gdx.utils.Pool.Poolable
 import com.sophia.restauranttycoon.Messages
 import com.sophia.restauranttycoon.model.role.CustomerRestaurantRole
 import com.sophia.restauranttycoon.model.role.RestaurantRole
+import com.sophia.restauranttycoon.model.state.HungerState
 
 class RestaurantCharacter(
     val role: RestaurantRole,
@@ -19,9 +21,16 @@ class RestaurantCharacter(
 ): Telegraph, Poolable {
 
 
+
     var targetPosition: Vector2 = Vector2(-1f, -1f)
     val stateMachine = DefaultStateMachine<RestaurantCharacter, State<RestaurantCharacter>>(this, role.startingState)
     val position = Vector2(x.toFloat(), y.toFloat())
+    
+    val hungerStateMachine = if (role.hasHunger) DefaultStateMachine<RestaurantCharacter, State<RestaurantCharacter>>(this, HungerState.NORMAL) else null
+    var hungerClock = 0f
+    val hungerClockDuration: Float = 5f
+    var hungerPenaltyClock = 0f
+    var hungerPenalty: Int = 0
 
     init {
         MessageManager.getInstance().addListener(this, Messages.MEAL_ARRIVED)
@@ -29,6 +38,7 @@ class RestaurantCharacter(
 
     fun update(delta: Float, restaurant: Restaurant) {
         stateMachine.update()
+        hungerStateMachine?.update()
     }
 
     fun clearTargetPosition() {
@@ -40,12 +50,15 @@ class RestaurantCharacter(
     }
 
     override fun handleMessage(p0: Telegram?): Boolean {
-        return stateMachine.handleMessage(p0)
+        return stateMachine.handleMessage(p0) &&
+            (hungerStateMachine?.handleMessage(p0) ?: false)
+
     }
 
     override fun reset() {
         role.reset()
         stateMachine.changeState(role.startingState)
+        hungerStateMachine?.changeState(HungerState.NORMAL)
         position.set(0f, 0f)
         targetPosition.set(-1f, -1f)
     }

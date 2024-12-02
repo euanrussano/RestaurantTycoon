@@ -1,8 +1,10 @@
 package com.sophia.restauranttycoon.screen
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.sophia.restauranttycoon.Assets
 import com.sophia.restauranttycoon.model.Restaurant
+import com.sophia.restauranttycoon.model.state.HungerState
 
 class RestaurantRenderer(val batch: SpriteBatch, val restaurant: Restaurant) {
     fun render() {
@@ -40,7 +42,19 @@ class RestaurantRenderer(val batch: SpriteBatch, val restaurant: Restaurant) {
         for (character in characters){
             val region = Assets.getRoleRegion(character.role::class)
             val position = character.position
+            batch.color = Color.WHITE
+            character.hungerStateMachine?.let {
+                batch.color = when (it.currentState){
+                    HungerState.STARVING -> Color.RED
+                    HungerState.HUNGRY -> Color.YELLOW
+                    HungerState.NORMAL -> Color.WHITE
+                    HungerState.WELL_FED -> Color.GREEN
+                    else -> Color.BLUE
+                }
+            }
+
             batch.draw(region, position.x, position.y, 1f, 1f)
+            batch.color = Color.WHITE
         }
     }
 
