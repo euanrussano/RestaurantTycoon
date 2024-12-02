@@ -28,9 +28,11 @@ import ktx.scene2d.*
 import kotlin.math.roundToInt
 
 class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter {
+
     private var placingFurniture: Furniture? = null
 
     private val moneyLabel: Label
+    private val reputationLabel: Label
     private val dayLabel: Label
     private val timeLabel: Label
 
@@ -61,11 +63,14 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
                 // top bar
                 table {
                     background = skin.newDrawable("white", Color.DARK_GRAY)
-                    this.defaults().padRight(5f)
+                    this.defaults().padRight(10f)
                     it.growX()
 
                     label("$ ")
                     moneyLabel = label("0")
+
+                    label("Reputation: ")
+                    reputationLabel = label("${restaurant.reputation}")
                     add().growX()
                     label("Day ")
                     dayLabel = label("${restaurant.day}")
@@ -206,6 +211,7 @@ class GameScreen(restaurantTycoon: RestaurantTycoon): KtxScreen, KtxInputAdapter
 
     private fun updateUI() {
         moneyLabel.txt = "${restaurant.balance}"
+        reputationLabel.txt = "${restaurant.reputation}"
         dayLabel.txt = "${restaurant.day}"
         timeLabel.txt = "${restaurant.time.roundToInt()}"
 

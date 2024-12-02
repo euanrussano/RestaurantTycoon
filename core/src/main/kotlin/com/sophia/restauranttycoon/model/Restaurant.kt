@@ -24,6 +24,10 @@ class Restaurant(
     var day = 0
     var time = 0f
 
+    var reputation = 50
+    var averageDailySatisfaction = 50
+    val satisfactionStandard = 50
+
     val entitiesToRelease = mutableListOf<RestaurantCharacter>()
     // Pooling is not working properly - FUTURE TODO
 //    val customerPool = object : Pool<RestaurantCharacter>(){
@@ -133,8 +137,41 @@ class Restaurant(
         // Reset daily specials or menu items - FUTURE
 //        resetDailySpecials()
 
+        // reputation update and effects
+        updateReputationAndEffects()
+
         // Log end of day
         Gdx.app.log("Restaurant", "End of day $day tasks performed.")
+    }
+
+    private fun updateReputationAndEffects() {
+        val averageDailySatisfaction = customers.sumOf { it.satisfaction }/customers.size
+        val reputationChange = (averageDailySatisfaction - satisfactionStandard)/10
+        reputation += reputationChange
+
+        for (restaurantSystem in restaurantSystems) {
+            restaurantSystem.onReputationChanged(reputation)
+        }
+
+        // Adjust pricing flexibility
+        val priceFlexibilityThreshold = 75
+        val priceIncreaseFactor = 0.05f
+        meals.forEach { item ->
+            if (reputation > priceFlexibilityThreshold) {
+                item.price = item.basePrice * (1 + ((reputation - priceFlexibilityThreshold) * priceIncreaseFactor).toInt())
+            }
+        }
+
+        /* FUTURE TODO
+        // Adjust staff morale and efficiency
+        val moraleThreshold = 75
+        employees.forEach { member ->
+            if (reputation > moraleThreshold) {
+                member.efficiency = baseEfficiency * (1 + (restaurant.reputation - moraleThreshold) * moraleBoostRate)
+            }
+        }
+        */
+
     }
 
     private fun paySalaries() {
@@ -145,7 +182,7 @@ class Restaurant(
         } else {
             Gdx.app.log("Restaurant", "Not enough balance to pay salaries!")
             // Handle the scenario where there is not enough money to pay salaries
-            // FUTURE:
+            // FUTURE TODO:
             // affect morale/productivity?
             // strikes/quitting?
             // loan?
@@ -225,15 +262,6 @@ class Restaurant(
             seat.customer == entity
         } as? Seat ?: throw Exception("seat not found")
     }
-
-    // TO DELETE
-//    fun findFirstCustomerWaitingToOrder(): RestaurantCharacter? {
-//        val customer = customers.firstOrNull {
-//            val state = it.stateMachine.currentState as? PlacingOrderState ?: return@firstOrNull false
-//            return@firstOrNull state.orderPlaced == false
-//        }
-//        return customer
-//    }
 
     fun findNearestCounter(sourcePosition: Vector2): Counter {
         val countersSorted =furnitures.filterIsInstance<Counter>().sortedBy {
